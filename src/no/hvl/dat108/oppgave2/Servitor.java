@@ -19,9 +19,19 @@ public class Servitor extends Thread {
             } catch (InterruptedException e) {
             }
 
-            String navn = this.getName();
-            Hamburger tatt = brett.taAv();
-            System.out.println(navn + " (servitør) tar av hamburger " + tatt + ". Brett: " + brett.toString());
+            synchronized (brett) {
+                String navn = this.getName();
+                if (brett.erTom()) {
+                    System.out.println(navn + " (servitør) ønsker å ta hamburger, men brettet er tomt. Venter!");
+                    try {
+                        brett.wait();
+                    } catch (InterruptedException e) {
+                    }
+                }
+                Hamburger tatt = brett.taAv();
+                System.out.println(navn + " (servitør) tar av hamburger " + tatt + ". Brett: " + brett.toString());
+                brett.notifyAll();
+            }
         }
     }
     

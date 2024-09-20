@@ -1,23 +1,23 @@
 package no.hvl.dat108.oppgave2;
 
+import java.util.LinkedList;
+
 public class HamburgerBrett {
     
     private int kapasitet;
-    private Hamburger forste;
-    private Hamburger siste;
+    private LinkedList<Hamburger> brett; 
     private int antallPaaBrett;
     private int antallTotaltLaget;
 
     public HamburgerBrett(int kapasitet) {
         this.kapasitet = kapasitet;
-        this.forste = null;
-        this.siste = null;
+        this.brett = new LinkedList<Hamburger>();
         this.antallPaaBrett = 0;
         this.antallTotaltLaget = 0;
     }
 
     public synchronized Hamburger leggTil() {
-        while (erFull()) {
+        if (this.erFull()) {
             try {
                 wait();
             } catch (InterruptedException e) {
@@ -27,12 +27,7 @@ public class HamburgerBrett {
         this.antallTotaltLaget++;
         Hamburger nyHamburger = new Hamburger(antallTotaltLaget);
 
-        if (this.erTom()) {
-            this.forste = nyHamburger;
-        } else {
-            this.siste.setNeste(nyHamburger);
-        }
-        this.siste = nyHamburger;
+        this.brett.add(nyHamburger);
         this.antallPaaBrett++;
         notifyAll();
 
@@ -40,26 +35,31 @@ public class HamburgerBrett {
     }
 
     public synchronized Hamburger taAv() {
-        while (erTom()) {
+        if (erTom()) {
             try {
                 wait();
             } catch (InterruptedException e) {
             }
         }
 
-        Hamburger tatt = this.forste;
-        this.forste = this.forste.getNeste();
+        Hamburger tatt = this.brett.pop();
         this.antallPaaBrett--;
-        notifyAll();
 
         return tatt;
     }
 
     public boolean erTom() {
-        return this.forste == null;
+        return this.brett.isEmpty();
     }
 
     public boolean erFull() {
         return this.antallPaaBrett == this.kapasitet;
     }
+
+    @Override
+    public String toString() {
+        return brett.toString();
+    }
+
+
 }

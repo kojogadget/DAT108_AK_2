@@ -19,9 +19,19 @@ public class Kokk extends Thread {
             } catch (InterruptedException e) {
             }
 
-            String navn = this.getName();
-            Hamburger laget = brett.leggTil();
-            System.out.println(navn + " (kokk) legger på hamburger " + laget + ". Brett: " + brett.toString());
+            synchronized (brett) {
+                String navn = this.getName();
+                if (brett.erFull()) {
+                    System.out.println(navn + " (kokk) ønsker å legge på hamburger, men brettet er fullt. Venter!");
+                    try {
+                        brett.wait();
+                    } catch (InterruptedException e) {
+                    }
+                }
+                Hamburger laget = brett.leggTil();
+                System.out.println(navn + " (kokk) legger på hamburger " + laget + ". Brett: " + brett.toString());
+                brett.notifyAll();
+            }
         }
     }
     
